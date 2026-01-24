@@ -1,0 +1,68 @@
+name: Ecomm Microservices CI/CD
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  RESOURCE_GROUP: rg-ecom-demo-eastus
+  ENVIRONMENT: dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service:
+          - CatalogService
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+          docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build & Push Image
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=$(echo "$REGISTRY/$OWNER/${{ matrix.service }}:${{ github.sha }}" | tr '[:upper:]' '[:lower:]')
+
+          docker build \
+            -t "$IMAGE" \
+            Services/${{ matrix.service }}
+
+          docker push "$IMAGE"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Service
+        run: |
+          ENV_ID=$(az containerapp env show \
+            -n containerEnv-${ENVIRONMENT} \
+            -g $RESOURCE_GROUP \
+            --query id -o tsv)
+
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          SERVICE=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=$(echo "$REGISTRY/$OWNER/${{ matrix.service }}:${{ github.sha }}" | tr '[:upper:]' '[:lower:]')
+
+          az deployment group create \
+            --resource-group $RESOURCE_GROUP \
+            --template-file deploy/infra/services/$SERVICE.bicep \
+            --parameters \
+              environment=$ENVIRONMENT \
+              image=$IMAGE \
+              containerEnvId=$ENV_ID \
+              registryUsername=${{ github.actor }} \
+              registryPassword=${{ secrets.GITHUB_TOKEN }}

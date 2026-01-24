@@ -1,0 +1,101 @@
+##################################
+# .NET / Visual Studio
+##################################
+bin/
+obj/
+out/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+.vs/
+
+##################################
+# Build & Publish
+##################################
+[Bb]uild/
+[Dd]ist/
+publish/
+*.publishsettings
+
+##################################
+# Logs
+##################################
+*.log
+logs/
+app-logs/
+
+##################################
+# NuGet
+##################################
+*.nupkg
+*.snupkg
+.nuget/packages/
+.nuget/cache/
+.nuget/http-cache/
+
+##################################
+# Environment & Secrets
+##################################
+.env
+.env.*
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+##################################
+# Azure
+##################################
+.azure/
+.azure-pipelines/
+*.azurePubxml
+*.pubxml
+*.pubxml.user
+ServiceDependencies/
+serviceDependencies.local.json
+
+##################################
+# Containers / Docker
+##################################
+**/Dockerfile.local
+docker-compose.override.yml
+docker-compose.vs.debug.yml
+docker-compose.vs.release.yml
+
+##################################
+# Kubernetes / Helm
+##################################
+charts/*/charts/
+charts/*/tmp/
+*.tgz
+
+##################################
+# Entity Framework
+##################################
+Migrations/*.Designer.cs
+Migrations/*.resx
+
+##################################
+# IDEs
+##################################
+.idea/
+.vscode/
+*.code-workspace
+
+##################################
+# OS Files
+##################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+##################################
+# Coverage & Testing
+##################################
+coverage/
+*.coverage
+*.coveragexml
