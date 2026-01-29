@@ -8,19 +8,19 @@ USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["CatalogService.API/CatalogService.API.csproj", "CatalogService.API/"]
-COPY ["CatalogService.Application/CatalogService.Application.csproj", "CatalogService.Application/"]
-COPY ["CatalogService.Domain/CatalogService.Domain.csproj", "CatalogService.Domain/"]
-COPY ["CatalogService.Infrastructure/CatalogService.Infrastructure.csproj", "CatalogService.Infrastructure/"]
-COPY ["../Common/Web/Web.csproj", "Common.Web/"]
+COPY ["CatalogService/CatalogService.API/CatalogService.API.csproj", "CatalogService.API/"]
+COPY ["CatalogService/CatalogService.Application/CatalogService.Application.csproj", "CatalogService.Application/"]
+COPY ["CatalogService/CatalogService.Domain/CatalogService.Domain.csproj", "CatalogService.Domain/"]
+COPY ["CatalogService/CatalogService.Infrastructure/CatalogService.Infrastructure.csproj", "CatalogService.Infrastructure/"]
+COPY ["Common/Web/Web.csproj", "Common.Web/"]
 RUN dotnet restore "CatalogService.API/CatalogService.API.csproj"
 
 COPY . .
-RUN dotnet build "CatalogService.API/CatalogService.API.csproj" -c $configuration -o /app/build
+RUN dotnet build "CatalogService/CatalogService.API/CatalogService.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "CatalogService.API/CatalogService.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "CatalogService/CatalogService.API/CatalogService.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
