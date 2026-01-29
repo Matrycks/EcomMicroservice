@@ -36,7 +36,7 @@ jobs:
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE=$(echo "$REGISTRY/$OWNER/${{ matrix.service }}:${{ github.sha }}" | tr '[:upper:]' '[:lower:]')
 
-          docker build \
+          docker buildx build \
             -f Services/${{ matrix.service }}/Dockerfile
             -t "$IMAGE" . \
 
