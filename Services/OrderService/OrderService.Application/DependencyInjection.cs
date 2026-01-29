@@ -14,6 +14,8 @@ namespace OrderService.Application
         {
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddScoped<GetOrder>();
+            services.AddScoped<GetOrders>();
+            services.AddScoped<CreateOrderHandler>();
 
             return services;
         }
