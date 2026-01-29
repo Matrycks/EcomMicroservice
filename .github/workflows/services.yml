@@ -38,7 +38,8 @@ jobs:
 
           docker buildx build \
             -f Services/${{ matrix.service }}/Dockerfile
-            -t "$IMAGE" . \
+            -t "$IMAGE" \
+            .
 
           docker push "$IMAGE"
 
