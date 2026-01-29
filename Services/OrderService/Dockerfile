@@ -8,20 +8,20 @@ USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["OrderService.API/OrderService.API.csproj", "OrderService.API/"]
-COPY ["OrderService.Application/OrderService.Application.csproj", "OrderService.Application/"]
-COPY ["OrderService.Domain/OrderService.Domain.csproj", "OrderService.Domain/"]
-COPY ["OrderService.Infrastructure/OrderService.Infrastructure.csproj", "OrderService.Infrastructure/"]
-COPY ["../Common/Web/Web.csproj", "Common.Web/"]
-COPY ["../Common/Common.Messaging/Common.Messaging.csproj", "Common.Common.Messaging/"]
+COPY ["OrderService/OrderService.API/OrderService.API.csproj", "OrderService.API/"]
+COPY ["OrderService/OrderService.Application/OrderService.Application.csproj", "OrderService.Application/"]
+COPY ["OrderService/OrderService.Domain/OrderService.Domain.csproj", "OrderService.Domain/"]
+COPY ["OrderService/OrderService.Infrastructure/OrderService.Infrastructure.csproj", "OrderService.Infrastructure/"]
+COPY ["Common/Web/Web.csproj", "Common.Web/"]
+COPY ["Common/Common.Messaging/Common.Messaging.csproj", "Common.Common.Messaging/"]
 RUN dotnet restore "OrderService.API/OrderService.API.csproj"
 
 COPY . .
-RUN dotnet build "OrderService.API/OrderService.API.csproj" -c $configuration -o /app/build
+RUN dotnet build "OrderService/OrderService.API/OrderService.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "OrderService.API/OrderService.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "OrderService/OrderService.API/OrderService.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
