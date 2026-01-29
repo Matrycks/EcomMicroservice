@@ -21,6 +21,7 @@ jobs:
       matrix:
         service:
           - CatalogService
+          - OrderService
 
     steps:
       - uses: actions/checkout@v4

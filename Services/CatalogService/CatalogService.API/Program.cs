@@ -1,4 +1,4 @@
-using CatalogService.API.Middleware;
+using Web.Middleware;
 using CatalogService.Application;
 using CatalogService.Infrastructure;
 using CatalogService.Infrastructure.DataInitializer;

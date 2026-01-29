@@ -12,6 +12,7 @@ COPY ["CatalogService.API/CatalogService.API.csproj", "CatalogService.API/"]
 COPY ["CatalogService.Application/CatalogService.Application.csproj", "CatalogService.Application/"]
 COPY ["CatalogService.Domain/CatalogService.Domain.csproj", "CatalogService.Domain/"]
 COPY ["CatalogService.Infrastructure/CatalogService.Infrastructure.csproj", "CatalogService.Infrastructure/"]
+COPY ["../Common/Web/Web.csproj", "Common.Web/"]
 RUN dotnet restore "CatalogService.API/CatalogService.API.csproj"
 
 COPY . .
