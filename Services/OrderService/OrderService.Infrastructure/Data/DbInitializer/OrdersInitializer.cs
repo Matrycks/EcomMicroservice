@@ -10,7 +10,7 @@ namespace OrderService.Infrastructure.Data.DbInitializer
 {
     public static class OrdersInitializer
     {
-        public static async Task Seed(this IServiceProvider serviceProvider)
+        public static void Seed(this IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
@@ -32,7 +32,7 @@ namespace OrderService.Infrastructure.Data.DbInitializer
                 }
             );
 
-            await context.SaveChangesAsync();
+            context.SaveChanges();
         }
     }
 }
