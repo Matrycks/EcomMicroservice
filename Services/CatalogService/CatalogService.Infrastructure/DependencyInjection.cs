@@ -19,7 +19,7 @@ namespace CatalogService.Infrastructure
         )
         {
             if (useInMemory)
-                services.AddDbContext<CatalogDbContext>(options => options.UseInMemoryDatabase("TestDb"));
+                services.AddDbContext<CatalogDbContext>(options => options.UseInMemoryDatabase("CatalogDb"));
             else
                 services.AddDbContext<CatalogDbContext>(options => options.UseSqlServer(connectionName));
 

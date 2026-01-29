@@ -1,27 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace CatalogService.API.Middleware
+namespace Web.Middleware
 {
     public class GlobalExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExceptionMiddleware> _logger;
         private readonly IHostEnvironment _env;
+        private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
-        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger, IHostEnvironment env)
+        public GlobalExceptionMiddleware(RequestDelegate next, IHostEnvironment environment,
+            ILogger<GlobalExceptionMiddleware> logger)
         {
             _next = next;
+            _env = environment;
             _logger = logger;
-            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
             string correlationId = context.TraceIdentifier;
+
             using (_logger.BeginScope(new Dictionary<string, object>
             {
                 ["CorrelationId"] = correlationId
@@ -41,15 +47,15 @@ namespace CatalogService.API.Middleware
                 {
                     _logger.LogError(ex, "Unhandled exception");
 
-                    await HandleExceptionDetails(context, ex);
+                    await HandleExceptionDetails(ex, context);
                 }
             }
         }
 
-        private async Task HandleExceptionDetails(HttpContext context, Exception ex)
+        private async Task HandleExceptionDetails(Exception ex, HttpContext httpContext)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = ex switch
+            httpContext.Response.ContentType = "application/json";
+            httpContext.Response.StatusCode = ex switch
             {
                 ArgumentException => StatusCodes.Status400BadRequest,
                 UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
@@ -59,8 +65,8 @@ namespace CatalogService.API.Middleware
 
             var response = new ProblemDetails
             {
-                Status = context.Response.StatusCode,
-                Title = context.Response.StatusCode switch
+                Status = httpContext.Response.StatusCode,
+                Title = httpContext.Response.StatusCode switch
                 {
                     StatusCodes.Status400BadRequest => "Invalid request",
                     StatusCodes.Status401Unauthorized => "Unauthorized request",
@@ -70,7 +76,7 @@ namespace CatalogService.API.Middleware
                 Detail = _env.IsDevelopment() ? ex.Message : "Oops.. something bad happened."
             };
 
-            await context.Response.WriteAsJsonAsync(response);
+            await httpContext.Response.WriteAsJsonAsync(response);
         }
     }
 }
