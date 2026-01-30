@@ -10,12 +10,12 @@ namespace OrderService.Infrastructure.Data.DbInitializer
 {
     public static class OrdersInitializer
     {
-        public static void Seed(this IServiceProvider serviceProvider)
+        public static IServiceProvider Seed(this IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
 
-            if (context.Orders.Any()) return;
+            if (context.Orders.Any()) return serviceProvider;
 
             context.Orders.AddRange(
                 new List<Order>
@@ -33,6 +33,8 @@ namespace OrderService.Infrastructure.Data.DbInitializer
             );
 
             context.SaveChanges();
+
+            return serviceProvider;
         }
     }
 }

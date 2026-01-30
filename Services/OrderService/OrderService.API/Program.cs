@@ -40,7 +40,7 @@ app.UseSwaggerUI(options =>
 });
 
 // Seed database
-await OrdersInitializer.Seed(app.Services);
+OrdersInitializer.Seed(app.Services);
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
