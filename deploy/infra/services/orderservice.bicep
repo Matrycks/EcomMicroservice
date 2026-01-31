@@ -3,6 +3,7 @@ param image string
 param containerEnvId string
 param registryUsername string
 param registryPassword string
+param serviceBusNamespace string = 'ecomm-microservices-dev'
 
 module order '../modules/container-app.bicep' = {
   name: 'order-app'
@@ -15,6 +16,7 @@ module order '../modules/container-app.bicep' = {
     environment: environment
     envVars: [
       { name: 'ASPNETCORE_ENVIRONMENT', value: environment }
+      { name: 'SERVICEBUS_NAMESPACE', value: '${serviceBusNamespace}.servicebus.windows.net' }
     ]
   }
 }

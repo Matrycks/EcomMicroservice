@@ -9,10 +9,12 @@ param maxReplicas int = 5
 param envVars array = []
 param registryUsername string
 param registryPassword string
+param identity object = {}
 
 resource app 'Microsoft.App/containerApps@2023-05-01' = {
   name: appName
   location: resourceGroup().location
+  identity: identity
   properties: {
     environmentId: containerEnvId
     configuration: {
