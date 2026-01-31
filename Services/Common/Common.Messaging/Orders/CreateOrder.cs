@@ -6,7 +6,7 @@ using Common.Messaging.Payloads;
 
 namespace Common.Messaging.Orders
 {
-    public record CreateOrder
+    public record CreateOrderMessage
     {
         public int CustomerId { get; set; }
         public ICollection<OrderItem> Items { get; set; } = null!;

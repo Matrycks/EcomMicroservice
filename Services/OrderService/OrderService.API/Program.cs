@@ -20,14 +20,14 @@ builder.Services.AddSwaggerGen(opt =>
         Description = "Ecommerce Order API"
     });
 
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    opt.IncludeXmlComments(xmlPath);
+    // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    // opt.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("OrdersDb") ?? "OrdersDb",
-    builder.Configuration["ServiceBus:ConnectionString"], true);
+    Environment.GetEnvironmentVariable("SERVICEBUS_NAMESPACE"), true);
 
 builder.Services.AddHealthChecks();
 

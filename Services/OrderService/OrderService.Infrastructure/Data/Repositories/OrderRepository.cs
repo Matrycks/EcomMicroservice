@@ -49,9 +49,9 @@ namespace OrderService.Infrastructure.Data.Repositories
             _dbContext.OrderItems.Remove(orderItem);
         }
 
-        public Task<IEnumerable<Order>> GetAllAsync()
+        public async Task<IEnumerable<Order>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _dbContext.Orders.ToListAsync();
         }
 
         public async Task<Order?> GetAsync(int entityId)
