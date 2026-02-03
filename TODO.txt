@@ -1,3 +1,4 @@
 - Add build and deploy steps in readme
 - Add Unit Testing
 - Add health check endpoints
+- List required azure resources
