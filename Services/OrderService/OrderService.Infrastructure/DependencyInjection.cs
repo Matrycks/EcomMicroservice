@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Common.Messaging.Orders;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,10 @@ namespace OrderService.Infrastructure
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services,
             string connectionName,
-            string? serviceBusConnStr,
+            string? servicebusNamespace,
             bool useInMemory = true)
         {
-            if (string.IsNullOrEmpty(serviceBusConnStr)) throw new Exception("ServiceBus not configured");
+            if (string.IsNullOrEmpty(servicebusNamespace)) throw new Exception("ServiceBus not configured");
 
             services.AddDbContext<OrdersDbContext>(options =>
             {
@@ -35,10 +36,10 @@ namespace OrderService.Infrastructure
             });
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-            services.AddSingleton(_ => new ServiceBusClient(serviceBusConnStr));
+            services.AddSingleton(_ => new ServiceBusClient(servicebusNamespace, new DefaultAzureCredential()));
             services.AddSingleton<IServiceBusPublisher, OrderMessagePublisher>();
             services.AddHostedService<CreateOrderConsumer>();
-            services.AddScoped<IMessageDispatcher<CreateOrder>, CreateOrderMessageDispatcher>();
+            services.AddSingleton<IMessageDispatcher, MessageDispatcher>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

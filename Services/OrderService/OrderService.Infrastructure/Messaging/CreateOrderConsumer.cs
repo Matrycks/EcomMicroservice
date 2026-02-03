@@ -5,7 +5,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Common.Messaging.Orders;
+using Mapster;
 using Microsoft.Extensions.Hosting;
+using OrderService.Domain.Entities;
 using OrderService.Infrastructure.Messaging.Interfaces;
 
 namespace OrderService.Infrastructure.Messaging
@@ -13,9 +15,9 @@ namespace OrderService.Infrastructure.Messaging
     public class CreateOrderConsumer : BackgroundService
     {
         private readonly ServiceBusProcessor _processor;
-        private readonly IMessageDispatcher<CreateOrder> _dispatcher;
+        private readonly IMessageDispatcher _dispatcher;
 
-        public CreateOrderConsumer(ServiceBusClient client, IMessageDispatcher<CreateOrder> dispatcher)
+        public CreateOrderConsumer(ServiceBusClient client, IMessageDispatcher dispatcher)
         {
             _processor = client.CreateProcessor(
                 topicName: "order-events",
@@ -47,13 +49,13 @@ namespace OrderService.Infrastructure.Messaging
 
         private async Task OnMessage(ProcessMessageEventArgs args)
         {
-            if (args.Message.Subject != nameof(CreateOrder)) return;
+            if (args.Message.Subject != nameof(CreateOrderMessage)) return;
 
-            var msgEvent = JsonSerializer.Deserialize<CreateOrder>(args.Message.Body);
+            var msgEvent = JsonSerializer.Deserialize<CreateOrderMessage>(args.Message.Body);
 
             if (msgEvent == null) return;
 
-            await _dispatcher.Dispatch(msgEvent);
+            await _dispatcher.Dispatch<CreateOrderMessage>(msgEvent);
 
             await args.CompleteMessageAsync(args.Message);
         }

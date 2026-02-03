@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace OrderService.Infrastructure.Messaging.Interfaces
 {
-    public interface IMessageDispatcher<T> where T : class
+    public interface IMessageDispatcher
     {
-        public Task Dispatch(T evt);
+        public Task Dispatch<T>(T message, CancellationToken cancellationToken = default);
     }
 }

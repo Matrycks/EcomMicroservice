@@ -12,7 +12,7 @@ namespace CatalogService.Infrastructure.DataInitializer
     {
         public static IServiceProvider Seed(this IServiceProvider serviceProvider)
         {
-            var scope = serviceProvider.CreateAsyncScope();
+            using var scope = serviceProvider.CreateAsyncScope();
             var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
             if (context.Products.Any()) return serviceProvider;

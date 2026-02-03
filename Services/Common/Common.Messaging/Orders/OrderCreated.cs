@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Common.Messaging.Orders
 {
-    public record OrderCreated
+    public record OrderCreatedMessage
     {
         public int OrderId { get; set; }
         public int CustomerId { get; set; }
