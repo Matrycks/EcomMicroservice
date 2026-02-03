@@ -3,7 +3,7 @@ param image string
 param containerEnvId string
 param registryUsername string
 param registryPassword string
-param location string
+param location string = resourceGroup().location
 param serviceBusNamespace string = 'ecomm-microservices-dev'
 
 // Managed Identities
