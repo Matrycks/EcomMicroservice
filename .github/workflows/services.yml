@@ -24,6 +24,7 @@ jobs:
         service:
           - CatalogService
           - OrderService
+          - CartService
 
     steps:
       - uses: actions/checkout@v4
@@ -66,6 +67,7 @@ jobs:
             --template-file deploy/infra/services/$SERVICE.bicep \
             --parameters \
               environment=$ENVIRONMENT \
+              serviceBusNamespace=ecomm-microservices-dev \
               image=$IMAGE \
               containerEnvId=$ENV_ID \
               registryUsername=${{ github.actor }} \

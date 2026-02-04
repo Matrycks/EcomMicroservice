@@ -4,46 +4,43 @@ param containerEnvId string
 param registryUsername string
 param registryPassword string
 param location string = resourceGroup().location
-param serviceBusNamespace string = 'ecomm-microservices-dev'
+param serviceBusNamespace string
 
-// Managed Identities
-resource orderServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: 'mi-orderservice'
+resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: 'mi-cartservice'
   location: location
 }
 
-resource sbNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' existing = {
+resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' existing = {
   name: serviceBusNamespace
 }
 
-// Auth. roles
-resource orderSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(sbNamespace.id, orderServiceMI.id, 'sender')
+resource auth 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(sbNamespace.id, cartServiceMI.id, 'sender')
   scope: sbNamespace
   properties: {
-    principalId: orderServiceMI.properties.principalId
+    principalId: cartServiceMI.properties.principalId
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
-      '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39',
-      '090c5cfd-751d-490a-894a-3ce6f1109419'
+      '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
     )
     principalType: 'ServicePrincipal'
   }
 }
 
-module order '../modules/container-app.bicep' = {
-  name: 'order-app'
+module cartApp '../modules/container-app.bicep' = {
+  name: 'cart-app'
   params: {
-    appName: 'order-api-${environment}'
+    appName: 'cart-api-${environment}'
+    environment: environment
     containerEnvId: containerEnvId
     image: image
     registryUsername: registryUsername
     registryPassword: registryPassword
-    environment: environment
     identity: {
       type: 'UserAssigned'
       userAssignedIdentities: {
-        '${orderServiceMI.id}': {}
+        '${cartServiceMI.id}': {}
       }
     }
     envVars: [
