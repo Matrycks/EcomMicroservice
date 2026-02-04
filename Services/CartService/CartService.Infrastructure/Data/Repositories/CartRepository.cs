@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CartService.Application.Interfaces;
 using CartService.Domain.Entities;
 using CartService.Infrastructure.Data.DataContext;
+using Common.Messaging.Payloads;
 using Microsoft.EntityFrameworkCore;
 
 namespace CartService.Infrastructure.Data.Repositories
@@ -45,7 +46,7 @@ namespace CartService.Infrastructure.Data.Repositories
 
         public async Task<Cart?> GetAsync(int entityId)
         {
-            var cart = await _dbContext.Carts.FindAsync(entityId)
+            var cart = await _dbContext.Carts.Include(x => x.Items).SingleOrDefaultAsync(x => x.CartId == entityId)
                 ?? throw new KeyNotFoundException($"Cart with Id: {entityId} not found");
 
             return cart;

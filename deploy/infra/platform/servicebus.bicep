@@ -24,6 +24,17 @@ resource orderServiceSubscription 'Microsoft.ServiceBus/namespaces/topics/subscr
   }
 }
 
+resource filterRule 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2024-01-01' = {
+  name: 'CreateOrderFilter'
+  parent: orderServiceSubscription
+  properties: {
+    filterType: 'SqlFilter'
+    sqlFilter: {
+      sqlExpression: 'sys.Label = \'CreateOrderMessage\''
+    }
+  }
+}
+
 // // Managed Identities
 // resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
 //   name: 'mi-cartservice'

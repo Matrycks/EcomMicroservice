@@ -24,4 +24,12 @@ public class CartsController : ControllerBase
 
         return Ok(nCart.Adapt<CartDto>());
     }
+
+    [HttpPost("checkout")]
+    public async Task<IActionResult> Checkout(CartCheckoutCommand command)
+    {
+        await _mediator.Send(command);
+
+        return NoContent();
+    }
 }

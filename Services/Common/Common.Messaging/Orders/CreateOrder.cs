@@ -10,7 +10,7 @@ namespace Common.Messaging.Orders
     {
         public int CustomerId { get; set; }
         public ICollection<OrderItem> Items { get; set; } = null!;
-        public decimal Total { get; private set; }
+        public decimal Total { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }

@@ -11,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddScoped<CreateCartHandler>();
+        services.AddScoped<CartCheckoutHandler>();
 
         return services;
     }
