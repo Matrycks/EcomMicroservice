@@ -25,6 +25,10 @@ builder.Services.AddSwaggerGen(opt =>
     // opt.IncludeXmlComments(xmlPath);
 });
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("OrdersDb") ?? "OrdersDb",
     Environment.GetEnvironmentVariable("SERVICEBUS_NAMESPACE"), true);
