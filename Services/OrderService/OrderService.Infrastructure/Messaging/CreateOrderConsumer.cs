@@ -7,6 +7,7 @@ using Azure.Messaging.ServiceBus;
 using Common.Messaging.Orders;
 using Mapster;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using OrderService.Domain.Entities;
 using OrderService.Infrastructure.Messaging.Interfaces;
 
@@ -16,15 +17,19 @@ namespace OrderService.Infrastructure.Messaging
     {
         private readonly ServiceBusProcessor _processor;
         private readonly IMessageDispatcher _dispatcher;
+        private readonly ILogger<CreateOrderConsumer> _logger;
 
-        public CreateOrderConsumer(ServiceBusClient client, IMessageDispatcher dispatcher)
+        public CreateOrderConsumer(ILogger<CreateOrderConsumer> logger,
+            ServiceBusClient client, IMessageDispatcher dispatcher)
         {
+            _logger = logger;
+
             _processor = client.CreateProcessor(
                 topicName: "order-events",
                 subscriptionName: "create-order",
                 new ServiceBusProcessorOptions
                 {
-                    MaxConcurrentCalls = 3,
+                    MaxConcurrentCalls = 2,
                     AutoCompleteMessages = false
                 });
 
@@ -33,31 +38,61 @@ namespace OrderService.Infrastructure.Messaging
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _processor.ProcessMessageAsync += OnMessage;
+            _processor.ProcessErrorAsync += OnError;
+
+            await _processor.StartProcessingAsync(stoppingToken);
+
             try
             {
-                _processor.ProcessMessageAsync += OnMessage;
-                _processor.ProcessErrorAsync += _ => Task.CompletedTask; // TODO: add logging
-
-                await _processor.StartProcessingAsync(stoppingToken);
+                await Task.Delay(Timeout.Infinite, stoppingToken);
             }
             catch (Exception ex)
             {
                 // TODO: handle logging
-                Console.WriteLine($"Error consuming message: {ex.Message}");
+                _logger.LogError(ex, "OrderMessageConsumer shutdown");
             }
         }
 
         private async Task OnMessage(ProcessMessageEventArgs args)
         {
-            if (args.Message.Subject != nameof(CreateOrderMessage)) return;
+            try
+            {
+                if (args.Message.Subject != nameof(CreateOrderMessage)) return;
 
-            var msgEvent = JsonSerializer.Deserialize<CreateOrderMessage>(args.Message.Body);
+                var msgEvent = JsonSerializer.Deserialize<CreateOrderMessage>(args.Message.Body);
 
-            if (msgEvent == null) return;
+                if (msgEvent == null) return;
 
-            await _dispatcher.Dispatch<CreateOrderMessage>(msgEvent);
+                await _dispatcher.Dispatch<CreateOrderMessage>(msgEvent);
 
-            await args.CompleteMessageAsync(args.Message);
+                await args.CompleteMessageAsync(args.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Message processing failed");
+                await args.DeadLetterMessageAsync(args.Message,
+                    "Process Error",
+                    ex.Message);
+            }
+        }
+
+        private async Task OnError(ProcessErrorEventArgs args)
+        {
+            _logger.LogError(args.Exception,
+                "Service Bus error. Entity: {EntityPath}, ErrorSource: {ErrorSource}",
+                args.EntityPath,
+                args.ErrorSource);
+
+            await Task.CompletedTask;
+        }
+
+        public async override Task StopAsync(CancellationToken cancellationToken)
+        {
+            await _processor.StopProcessingAsync(cancellationToken);
+            await _processor.DisposeAsync();
+
+            await base.StopAsync(cancellationToken);
         }
     }
 }
