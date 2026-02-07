@@ -7,7 +7,7 @@ param location string = resourceGroup().location
 param serviceBusNamespace string
 var senderRole string = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
 
-resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: 'mi-cartservice'
   location: location
 }
