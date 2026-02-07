@@ -5,6 +5,7 @@ param registryUsername string
 param registryPassword string
 param location string = resourceGroup().location
 param serviceBusNamespace string
+var senderRole string = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
 
 resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: 'mi-cartservice'
@@ -15,15 +16,17 @@ resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' existing = {
   name: serviceBusNamespace
 }
 
+resource ordersTopic 'Microsoft.ServiceBus/namespaces/topics@2024-01-01' existing = {
+  name: 'order-events'
+  parent: sbNamespace
+}
+
 resource auth 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(sbNamespace.id, cartServiceMI.id, 'sender')
-  scope: sbNamespace
+  name: guid(ordersTopic.id, cartServiceMI.id, senderRole)
+  scope: ordersTopic
   properties: {
     principalId: cartServiceMI.properties.principalId
-    roleDefinitionId: subscriptionResourceId(
-      'Microsoft.Authorization/roleDefinitions',
-      '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
-    )
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', senderRole)
     principalType: 'ServicePrincipal'
   }
 }
