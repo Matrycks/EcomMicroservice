@@ -16,7 +16,7 @@ resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' existing = {
   name: serviceBusNamespace
 }
 
-resource ordersTopic 'Microsoft.ServiceBus/namespaces/topics@2024-01-01' existing = {
+resource ordersTopic 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' existing = {
   name: 'order-events'
   parent: sbNamespace
 }
