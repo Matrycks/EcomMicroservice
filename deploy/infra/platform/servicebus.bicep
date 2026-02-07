@@ -1,7 +1,7 @@
 param location string = resourceGroup().location
 param namespaceName string = 'ecomm-microservices-dev'
 
-resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
+resource sbNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: namespaceName
   location: location
   sku: {

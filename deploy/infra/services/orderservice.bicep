@@ -15,7 +15,7 @@ resource orderServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-0
   location: location
 }
 
-resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' existing = {
+resource sbNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' existing = {
   name: serviceBusNamespace
 }
 

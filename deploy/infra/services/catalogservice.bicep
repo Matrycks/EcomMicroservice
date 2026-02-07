@@ -14,7 +14,7 @@ resource catalogServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023
   location: location
 }
 
-resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
+resource sbNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespace
 }
 

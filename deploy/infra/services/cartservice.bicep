@@ -12,11 +12,11 @@ resource cartServiceMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01
   location: location
 }
 
-resource sbNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' existing = {
+resource sbNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' existing = {
   name: serviceBusNamespace
 }
 
-resource ordersTopic 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' existing = {
+resource ordersTopic 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' existing = {
   name: 'order-events'
   parent: sbNamespace
 }
