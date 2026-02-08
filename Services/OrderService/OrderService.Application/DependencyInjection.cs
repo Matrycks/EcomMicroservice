@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Common.Messaging.Orders;
 using Microsoft.Extensions.DependencyInjection;
+using OrderService.Application.Messaging.Interfaces;
 using OrderService.Application.Orders;
 
 namespace OrderService.Application
@@ -15,7 +17,7 @@ namespace OrderService.Application
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddScoped<GetOrder>();
             services.AddScoped<GetOrders>();
-            services.AddScoped<CreateOrderHandler>();
+            services.AddScoped<IMessageHandler<CreateOrderMessage>, CreateOrderHandler>();
 
             return services;
         }
