@@ -68,6 +68,7 @@ module order '../modules/container-app.bicep' = {
     envVars: [
       { name: 'ASPNETCORE_ENVIRONMENT', value: environment }
       { name: 'SERVICEBUS_NAMESPACE', value: '${serviceBusNamespace}.servicebus.windows.net' }
+      { name: 'UAMI_CLIENT_ID', value: orderServiceMI.properties.clientId }
     ]
   }
 }

@@ -50,6 +50,7 @@ module cartApp '../modules/container-app.bicep' = {
     envVars: [
       { name: 'ASPNETCORE_ENVIRONMENT', value: environment }
       { name: 'SERVICEBUS_NAMESPACE', value: '${serviceBusNamespace}.servicebus.windows.net' }
+      { name: 'UAMI_CLIENT_ID', value: cartServiceMI.properties.clientId }
     ]
   }
 }

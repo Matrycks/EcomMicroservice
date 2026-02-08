@@ -28,7 +28,8 @@ public static class DependencyInjection
 
         services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddSingleton(_ => new ServiceBusClient(servicebusNamespace, new DefaultAzureCredential()));
+        services.AddSingleton(_ => new ServiceBusClient(servicebusNamespace,
+            new ManagedIdentityCredential(clientId: Environment.GetEnvironmentVariable("UAMI_CLIENT_ID"))));
         services.AddSingleton<IServiceBusPublisher, OrderMessagePublisher>();
 
         return services;

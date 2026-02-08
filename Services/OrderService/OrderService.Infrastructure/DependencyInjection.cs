@@ -36,7 +36,8 @@ namespace OrderService.Infrastructure
             });
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-            services.AddSingleton(_ => new ServiceBusClient(servicebusNamespace, new DefaultAzureCredential()));
+            services.AddSingleton(_ => new ServiceBusClient(servicebusNamespace,
+                new ManagedIdentityCredential(clientId: Environment.GetEnvironmentVariable("UAMI_CLIENT_ID"))));
             services.AddSingleton<IServiceBusPublisher, OrderMessagePublisher>();
             services.AddHostedService<CreateOrderConsumer>();
             services.AddSingleton<IMessageDispatcher, MessageDispatcher>();
