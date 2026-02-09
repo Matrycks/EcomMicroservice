@@ -21,7 +21,7 @@ namespace OrderService.Infrastructure.Messaging
             _provider = provider;
         }
 
-        public async Task Dispatch<T>(T message, CancellationToken cancellationToken)
+        public async Task Dispatch<T>(T message, CancellationToken cancellationToken = default)
         {
             using var scope = _provider.CreateScope();
             var handler = scope.ServiceProvider.GetRequiredService<IMessageHandler<T>>();

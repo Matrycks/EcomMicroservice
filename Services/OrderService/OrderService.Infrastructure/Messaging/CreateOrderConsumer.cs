@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Common.Messaging.Orders;
 using Mapster;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OrderService.Domain.Entities;
@@ -16,11 +17,11 @@ namespace OrderService.Infrastructure.Messaging
     public class CreateOrderConsumer : BackgroundService
     {
         private readonly ServiceBusProcessor _processor;
-        private readonly IMessageDispatcher _dispatcher;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<CreateOrderConsumer> _logger;
 
         public CreateOrderConsumer(ILogger<CreateOrderConsumer> logger,
-            ServiceBusClient client, IMessageDispatcher dispatcher)
+            ServiceBusClient client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
 
@@ -33,7 +34,7 @@ namespace OrderService.Infrastructure.Messaging
                     AutoCompleteMessages = false
                 });
 
-            _dispatcher = dispatcher;
+            _scopeFactory = scopeFactory;
 
             _processor.ProcessMessageAsync += OnMessage;
             _processor.ProcessErrorAsync += OnError;
@@ -43,18 +44,18 @@ namespace OrderService.Infrastructure.Messaging
         {
             try
             {
-                _logger.LogInformation("Starting Service Bus processor");
+                _logger.LogInformation("*** Starting Service Bus processor");
                 await _processor.StartProcessingAsync(stoppingToken);
 
                 await Task.Delay(Timeout.Infinite, stoppingToken);
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("Service Bus consumer stopping");
+                _logger.LogInformation("*** Service Bus consumer stopping");
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "Fatal error starting Service Bus consumer");
+                _logger.LogCritical(ex, "*** Fatal error starting Service Bus consumer");
                 throw;
             }
         }
@@ -62,34 +63,53 @@ namespace OrderService.Infrastructure.Messaging
         private async Task OnMessage(ProcessMessageEventArgs args)
         {
             _logger.LogInformation(
-                "Received message {MessageId}", args.Message.MessageId);
+                "*** Received message {MessageId}", args.Message.MessageId);
 
             try
             {
-                if (args.Message.Subject != nameof(CreateOrderMessage)) return;
+                if (args.Message.Subject != nameof(CreateOrderMessage))
+                {
+                    await args.DeadLetterMessageAsync(
+                        args.Message,
+                        "InvalidSubject",
+                        args.Message.Subject);
 
-                var msgEvent = JsonSerializer.Deserialize<CreateOrderMessage>(args.Message.Body);
+                    return;
+                }
 
-                if (msgEvent == null) return;
+                var msgEvent = args.Message.Body
+                    .ToObjectFromJson<CreateOrderMessage>();
 
-                await _dispatcher.Dispatch<CreateOrderMessage>(msgEvent);
+                using var scope = _scopeFactory.CreateScope();
+                var dispatcher = scope.ServiceProvider
+                    .GetRequiredService<IMessageDispatcher>();
+
+                await dispatcher.Dispatch(msgEvent);
 
                 await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Message processing failed");
+                _logger.LogError(ex, "*** Message processing failed");
 
-                await args.DeadLetterMessageAsync(args.Message,
-                    "Process Error",
-                    ex.Message);
+                if (args.Message.DeliveryCount >= 5)
+                {
+                    await args.DeadLetterMessageAsync(
+                        args.Message,
+                        "ProcessingFailed",
+                        ex.Message);
+                }
+                else
+                {
+                    await args.AbandonMessageAsync(args.Message);
+                }
             }
         }
 
         private async Task OnError(ProcessErrorEventArgs args)
         {
             _logger.LogError(args.Exception,
-                "Service Bus error. Entity: {EntityPath}, ErrorSource: {ErrorSource}",
+                "*** Service Bus error. Entity: {EntityPath}, ErrorSource: {ErrorSource}",
                 args.EntityPath,
                 args.ErrorSource);
 
@@ -98,7 +118,7 @@ namespace OrderService.Infrastructure.Messaging
 
         public async override Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Stopping Service Bus processor");
+            _logger.LogInformation("*** Stopping Service Bus processor");
 
             await _processor.StopProcessingAsync(cancellationToken);
             await _processor.DisposeAsync();
