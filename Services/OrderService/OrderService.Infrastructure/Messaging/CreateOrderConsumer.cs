@@ -34,28 +34,36 @@ namespace OrderService.Infrastructure.Messaging
                 });
 
             _dispatcher = dispatcher;
+
+            _processor.ProcessMessageAsync += OnMessage;
+            _processor.ProcessErrorAsync += OnError;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _processor.ProcessMessageAsync += OnMessage;
-            _processor.ProcessErrorAsync += OnError;
-
-            await _processor.StartProcessingAsync(stoppingToken);
-
             try
             {
+                _logger.LogInformation("Starting Service Bus processor");
+                await _processor.StartProcessingAsync(stoppingToken);
+
                 await Task.Delay(Timeout.Infinite, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Service Bus consumer stopping");
             }
             catch (Exception ex)
             {
-                // TODO: handle logging
-                _logger.LogError(ex, "OrderMessageConsumer shutdown");
+                _logger.LogCritical(ex, "Fatal error starting Service Bus consumer");
+                throw;
             }
         }
 
         private async Task OnMessage(ProcessMessageEventArgs args)
         {
+            _logger.LogInformation(
+                "Received message {MessageId}", args.Message.MessageId);
+
             try
             {
                 if (args.Message.Subject != nameof(CreateOrderMessage)) return;
@@ -71,6 +79,7 @@ namespace OrderService.Infrastructure.Messaging
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Message processing failed");
+
                 await args.DeadLetterMessageAsync(args.Message,
                     "Process Error",
                     ex.Message);
@@ -89,6 +98,8 @@ namespace OrderService.Infrastructure.Messaging
 
         public async override Task StopAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Stopping Service Bus processor");
+
             await _processor.StopProcessingAsync(cancellationToken);
             await _processor.DisposeAsync();
 
