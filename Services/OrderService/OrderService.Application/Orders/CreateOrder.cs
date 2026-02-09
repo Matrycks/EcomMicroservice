@@ -34,13 +34,13 @@ namespace OrderService.Application.Orders
             await _orderRepository.AddAsync(newOrder);
             await _unitOfWork.SaveChangesAsync();
 
-            await _publisher.PublishAsync(new OrderCreatedMessage
-            {
-                OrderId = newOrder.OrderId,
-                CustomerId = newOrder.CustomerId,
-                TotalAmount = newOrder.Total,
-                CreatedDate = newOrder.CreatedDate
-            });
+            // await _publisher.PublishAsync(new OrderCreatedMessage
+            // {
+            //     OrderId = newOrder.OrderId,
+            //     CustomerId = newOrder.CustomerId,
+            //     TotalAmount = newOrder.Total,
+            //     CreatedDate = newOrder.CreatedDate
+            // });
         }
     }
 }
