@@ -41,8 +41,8 @@ resource orderSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
 }
 
 resource orderReceiverRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(orderServiceSubscription.id, orderServiceMI.id, receiverRole)
-  scope: orderServiceSubscription
+  name: guid(sbNamespace.id, orderServiceMI.id, receiverRole)
+  scope: sbNamespace
   properties: {
     principalId: orderServiceMI.properties.principalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', receiverRole)
