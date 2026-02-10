@@ -17,15 +17,13 @@ namespace OrderService.Application.Orders
     public class CreateOrderHandler : IMessageHandler<CreateOrderMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IOrderRepository _orderRepository;
         private readonly IServiceBusPublisher _publisher;
         private readonly ILogger<CreateOrderHandler> _logger;
 
-        public CreateOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
-            IServiceBusPublisher publisher, ILogger<CreateOrderHandler> logger)
+        public CreateOrderHandler(IUnitOfWork unitOfWork, IServiceBusPublisher publisher,
+            ILogger<CreateOrderHandler> logger)
         {
             _unitOfWork = unitOfWork;
-            _orderRepository = orderRepository;
             _publisher = publisher;
             _logger = logger;
         }
@@ -36,7 +34,7 @@ namespace OrderService.Application.Orders
 
             var newOrder = new Order(message.CustomerId, new Guid(), message.Items.Adapt<List<OrderItem>>());
 
-            await _orderRepository.AddAsync(newOrder);
+            await _unitOfWork.Orders.AddAsync(newOrder);
             await _unitOfWork.SaveChangesAsync();
 
             // await _publisher.PublishAsync(new OrderCreatedMessage
