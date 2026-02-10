@@ -8,6 +8,7 @@ using Mapster;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Messaging.Interfaces;
 using OrderService.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace OrderService.Application.Orders
 {

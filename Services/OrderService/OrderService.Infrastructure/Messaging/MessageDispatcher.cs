@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Common.Messaging.Orders;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OrderService.Application.Messaging.Interfaces;
 using OrderService.Application.Orders;
 using OrderService.Domain.Entities;
@@ -15,10 +16,13 @@ namespace OrderService.Infrastructure.Messaging
     public class MessageDispatcher : IMessageDispatcher
     {
         private readonly IServiceProvider _provider;
+        private readonly ILogger<MessageDispatcher> _logger;
 
-        public MessageDispatcher(IServiceProvider provider)
+        public MessageDispatcher(IServiceProvider provider,
+            ILogger<MessageDispatcher> logger)
         {
             _provider = provider;
+            _logger = logger;
         }
 
         public async Task Dispatch<T>(T message, CancellationToken cancellationToken = default)
