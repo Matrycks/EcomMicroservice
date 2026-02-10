@@ -18,17 +18,21 @@ namespace OrderService.Application.Orders
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOrderRepository _orderRepository;
         private readonly IServiceBusPublisher _publisher;
+        private readonly ILogger<CreateOrderHandler> _logger;
 
         public CreateOrderHandler(IUnitOfWork unitOfWork, IOrderRepository orderRepository,
-            IServiceBusPublisher publisher)
+            IServiceBusPublisher publisher, ILogger<CreateOrderHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _orderRepository = orderRepository;
             _publisher = publisher;
+            _logger = logger;
         }
 
         public async Task HandleTask(CreateOrderMessage message, CancellationToken cToken)
         {
+            _logger.LogInformation("*** CreateOrder started ***");
+
             var newOrder = new Order(message.CustomerId, new Guid(), message.Items.Adapt<List<OrderItem>>());
 
             await _orderRepository.AddAsync(newOrder);
@@ -41,6 +45,8 @@ namespace OrderService.Application.Orders
             //     TotalAmount = newOrder.Total,
             //     CreatedDate = newOrder.CreatedDate
             // });
+
+            _logger.LogInformation("*** CreateOrder finished ***");
         }
     }
 }
