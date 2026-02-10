@@ -5,7 +5,7 @@ param environment string
 param cpu string = '0.5'
 param memory string = '1Gi'
 param minReplicas int = 1
-param maxReplicas int = 5
+param maxReplicas int = 1
 param envVars array = []
 param registryUsername string
 param registryPassword string
