@@ -3,6 +3,7 @@ using CartService.Application;
 using CartService.Application.Interfaces;
 using CartService.Infrastructure;
 using CartService.Infrastructure.Data.Services;
+using Microsoft.VisualBasic;
 using Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,8 @@ builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("Or
         cfg.BaseAddress = new Uri(builder.Configuration.GetValue<string>("Products:BaseAddress")!);
     });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -41,11 +44,7 @@ app.UseSwaggerUI(options =>
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-
-}
+app.MapHealthChecks("/health");
 
 app.UseHttpsRedirection();
 

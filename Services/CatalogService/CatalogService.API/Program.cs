@@ -27,6 +27,8 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("CatalogDb") ?? "CatalogDb", true);
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -35,15 +37,11 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ecommerce API v1");
 });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-
-}
-
 ProductsInitializer.Seed(app.Services);
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.MapHealthChecks("/health");
 
 app.UseHttpsRedirection();
 
