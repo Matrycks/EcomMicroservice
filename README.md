@@ -16,4 +16,6 @@ A demo ASP.NET Core 9 application built within a Microservice for managing order
 - EF Core 9
 - SQL Sever(InMemory)
 - Docker
-- Azure
+- Azure ContainerApp
+- Azure Service Bus
+- Github Workflow (CI/CD)
